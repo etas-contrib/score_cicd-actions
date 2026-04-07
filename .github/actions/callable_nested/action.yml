@@ -1,0 +1,14 @@
+name: Callable Action Nested
+description: A reusable action that can be called from other actions in the same repo
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        echo "This is a nested callable action!"
+
+        echo "github.action: ${{ github.action }}"
+        echo "github.action_path: ${{ github.action_path }}"
+        echo "github.action_ref: ${{ github.action_ref }}"
+        echo "github.action_repository: ${{ github.action_repository }}"
