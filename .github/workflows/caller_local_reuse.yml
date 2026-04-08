@@ -6,60 +6,39 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}--${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
 
   call-local-action:
     runs-on: ${{ vars.runner_labels_ghub_standard_x64 && fromJSON(vars.runner_labels_ghub_standard_x64) || 'ubuntu-latest' }}
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
     steps:
-      # Running the callable action requires a checkout of this repository first. If not done it fails!
-      - name: Check out
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Checkout Callable Actions Repository
-        uses: dariocurr/checkout-called@v6
-        with:
-          # Choose a folder that is hopefully not tracked by git and not used by other actions.
-          # Ideally path name contains the name of the callable workflow repository to avoid confusion with other reusable workflows in the same repository.
-          path: .github/._callable_actions_repo
-
       - name: Call local action
-        uses: ./.github/._callable_actions_repo/.github/actions/callable
+        uses: ./.github/actions/callable
+        with:
+          ref: ${{ github.workflow_sha }}
 
   call-local-script:
     runs-on: ${{ vars.runner_labels_ghub_standard_x64 && fromJSON(vars.runner_labels_ghub_standard_x64) || 'ubuntu-latest' }}
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
     steps:
-      # Running the callable script requires a checkout of this repository first. If not done it fails!
-      - name: Check out
+      - name: Checkout repository
         uses: actions/checkout@v6
-
-      - name: Checkout Callable Actions Repository
-        uses: dariocurr/checkout-called@v6
-        with:
-          # Choose a folder that is hopefully not tracked by git and not used by other actions.
-          # Ideally path name contains the name of the callable workflow repository to avoid confusion with other reusable workflows in the same repository.
-          path: .github/._callable_actions_repo
 
       - name: Call local script
         shell: bash
         run: |
-          chmod +x ./.github/._callable_actions_repo/.github/scripts/script.sh
-          ./.github/._callable_actions_repo/.github/scripts/script.sh
+          echo "::group::  Call local script"
+
+          chmod +x ./.github/scripts/script.sh
+          ./.github/scripts/script.sh
+
+          echo "::endgroup::"
 
   call-local-workflow:
     uses: ./.github/workflows/callable.yml
-
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
+    with:
+      ref: ${{ github.workflow_sha }}
