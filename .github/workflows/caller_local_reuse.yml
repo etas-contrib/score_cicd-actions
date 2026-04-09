@@ -1,7 +1,5 @@
 name: Test Caller uses local actions and workflows
 
-# Dummy change to trigger pr workflow
-
 on:
   push:
   pull_request:
