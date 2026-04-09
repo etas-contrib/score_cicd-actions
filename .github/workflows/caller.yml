@@ -5,14 +5,14 @@ on:
   workflow_dispatch:
     inputs:
       central_gha_assets_repo:
-        description: 'Repository owner/name for same org (e.g., etas-eng/vsps_infra_playground)'
+        description: 'Repository owner/name for same org (e.g., etas-contrib/score_cicd-actions)'
         required: true
-        default: 'etas-eng/vsps_infra_playground'
+        default: 'etas-contrib/score_cicd-actions'
         type: string
       central_gha_assets_repo_ref:
         description: 'Git reference for same org (branch, tag, or commit)'
         required: true
-        default: 'tml2si'
+        default: 'feature/test_cross_org_wflow_reuse'
         type: string
   pull_request:
 
@@ -21,8 +21,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CENTRAL_GHA_ASSETS_REPO: ${{ inputs.central_gha_assets_repo || 'etas-eng/vsps_infra_playground' }}
-  CENTRAL_GHA_ASSETS_REPO_REF: ${{ inputs.central_gha_assets_repo_ref || 'tml2si' }}
+  CENTRAL_GHA_ASSETS_REPO: ${{ inputs.central_gha_assets_repo || 'etas-contrib/score_cicd-actions' }}
+  CENTRAL_GHA_ASSETS_REPO_REF: ${{ inputs.central_gha_assets_repo_ref || 'feature/test_cross_org_wflow_reuse' }}
 
 jobs:
 
@@ -92,8 +92,8 @@ jobs:
             ref: ${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}
 
   call-remote-workflow-same-org:
-    uses: etas-eng/vsps_infra_playground/.github/workflows/callable.yml@tml2si
+    uses: etas-contrib/score_cicd-actions/.github/workflows/callable.yml@feature/test_cross_org_wflow_reuse
     with:
       # Must use same ref like in the above uses call
-      ref: "tml2si"
+      ref: "feature/test_cross_org_wflow_reuse"
 

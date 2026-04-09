@@ -11,7 +11,7 @@ on:
 
 env:
   # Put the repo owner and name this file is contained in here
-  repository: etas-eng/vsps_infra_playground
+  repository: etas-contrib/score_cicd-actions
 
 jobs:
   run_nested_callable_workflow_steps:
@@ -33,7 +33,7 @@ jobs:
       - name: Call Reusable Action from this Repo 'Workaround 4'
         uses: jenseng/dynamic-uses@v1.1.1
         with:
-          uses: etas-eng/vsps_infra_playground/.github/actions/callable@${{ inputs.ref }}
+          uses: etas-contrib/score_cicd-actions/.github/actions/callable@${{ inputs.ref }}
           with: |
             ref: ${{ inputs.ref }}
 
@@ -56,4 +56,4 @@ jobs:
           path: .github/.reuse_gha_assets/${{ env.repository }}
 
       - name: Call Reusable Action from this Repo 'Workaround 3 Static'
-        uses: ./.github/.reuse_gha_assets/etas-eng/vsps_infra_playground/.github/actions/callable_wa3static
+        uses: ./.github/.reuse_gha_assets/etas-contrib/score_cicd-actions/.github/actions/callable_wa3static

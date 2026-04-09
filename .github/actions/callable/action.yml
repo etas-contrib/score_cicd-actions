@@ -54,12 +54,12 @@ runs:
 
       # Next call does not work since the "uses" must be a static string
       # - name: Call remote action
-      #   uses: etas-eng/vsps_infra_playground/.github/actions/callable_nested@${{ inputs.ref }}
+      #   uses: etas-contrib/score_cicd-actions/.github/actions/callable_nested@${{ inputs.ref }}
 
     - name: Call nested action 'Workaround 4'
       uses: jenseng/dynamic-uses@v1.1.1
       with:
-        uses: etas-eng/vsps_infra_playground/.github/actions/callable_nested@${{ inputs.ref }}
+        uses: etas-contrib/score_cicd-actions/.github/actions/callable_nested@${{ inputs.ref }}
 
     - name: Symlink current actions repo 'Workaround 2'
       shell: bash
