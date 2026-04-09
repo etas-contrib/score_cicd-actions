@@ -13,64 +13,57 @@ jobs:
 
   call-local-action:
     runs-on: ${{ vars.runner_labels_ghub_standard_x64 && fromJSON(vars.runner_labels_ghub_standard_x64) || 'ubuntu-latest' }}
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
     steps:
-      # Running the callable action requires a checkout of this repository first. If not done it fails!
-      - name: Check out
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Debug logging
+      - name: Call local action
+        uses: ./.github/actions/callable
+        with:
+          ref: ${{ github.workflow_sha }}
+
+      # Normally this checkout would be done but since the workflow is from the same repo like the reusable actions and workflows
+      # I can save another checkout and instead just create a symlink
+      # - name: Checkout callable repository 'Workaround 3 Static'
+      #   uses: actions/checkout@v6
+      #   with:
+      #     # In case this runs in a forked repository then the folder name would not match the actual repo name but it is always the name
+      #     # of the fork source (=PR target) repository
+      #     path: .github/.reuse_gha_assets/etas-contrib/score_cicd-actions
+
+      - name: Create symlink for the called actions
         shell: bash
         run: |
-          # enable extended globbing for pattern matching
-          shopt -s extglob
-  
-          JWT=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL")
-          PAYLOAD=$(echo "$JWT" | cut -d '.' -f 2 | base64 -d 2>/dev/null || true)
-          echo "PAYLOAD:"
-          echo $PAYLOAD
-        
-      - name: Checkout Callable Actions Repository
-        uses: dariocurr/checkout-called@v6
-        with:
-          # Choose a folder that is hopefully not tracked by git and not used by other actions.
-          # Ideally path name contains the name of the callable workflow repository to avoid confusion with other reusable workflows in the same repository.
-          path: .github/._callable_actions_repo
+          echo "::group::  Create symlink for the called actions"
 
-      - name: Call local action
-        uses: ./.github/._callable_actions_repo/.github/actions/callable
+          # Create a symlink /.github/.reuse_gha_assets/etas-contrib/score_cicd-actions that points to the current folder where the repository is checked out.
+          # This is needed since the called action expects the repository to be checked out into a folder with the path
+          # .github/.reuse_gha_assets/vsps_infra_playground in the workspace of the calling workflow.
+          mkdir -p $PWD/.github/.reuse_gha_assets/etas-eng
+          ln -s $PWD/.github/.reuse_gha_assets/etas-contrib/score_cicd-actionscd $PWD
+
+          echo "::endgroup::"
+
+      - name: Call Reusable Action from this Repo 'Workaround 3 Static'
+        uses: ./.github/.reuse_gha_assets/etas-contrib/score_cicd-actions/.github/actions/callable_wa3static
 
   call-local-script:
     runs-on: ${{ vars.runner_labels_ghub_standard_x64 && fromJSON(vars.runner_labels_ghub_standard_x64) || 'ubuntu-latest' }}
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
     steps:
-      # Running the callable script requires a checkout of this repository first. If not done it fails!
-      - name: Check out
+      - name: Checkout repository
         uses: actions/checkout@v6
-
-      - name: Checkout Callable Actions Repository
-        uses: dariocurr/checkout-called@v6
-        with:
-          # Choose a folder that is hopefully not tracked by git and not used by other actions.
-          # Ideally path name contains the name of the callable workflow repository to avoid confusion with other reusable workflows in the same repository.
-          path: .github/._callable_actions_repo
 
       - name: Call local script
         shell: bash
         run: |
-          chmod +x ./.github/._callable_actions_repo/.github/scripts/script.sh
-          ./.github/._callable_actions_repo/.github/scripts/script.sh
+          echo "::group::  Call local script"
+
+          chmod +x ./.github/scripts/script.sh
+          ./.github/scripts/script.sh
+
+          echo "::endgroup::"
 
   call-local-workflow:
     uses: ./.github/workflows/callable.yml
-
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
+    with:
+      ref: ${{ github.workflow_sha }}

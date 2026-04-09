@@ -3,66 +3,57 @@ name: Nested callable reusable workflow
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        description: 'Git reference - branch, tag, or commit SHA of this file in this repository to use by the caller'
+        required: true
+        type: string
+
+env:
+  # Put the repo owner and name this file is contained in here
+  repository: etas-contrib/score_cicd-actions
 
 jobs:
   run_nested_callable_workflow_steps:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - name: Run caller reusable workflow
-        run: |
-          echo "Running caller reusable workflow..."
-          echo ""
-          echo "================================================================="
-          echo ""
-
-
-          # Workaround 1 description:
-          # 1. Use the checkout-callable action to checkout the repository where the callable workflow is located
-          #    Workflow requires id-token: write permissions to run this action successfully. This is required to checkout a repository using the OIDC token of the runner which is the only way to checkout the repository without hardcoding a PAT token in the workflow.
-          # 2. Call the reusable workflow using the "uses" statement and reference the workflow file from the checked out repository
-          # 3. Call the script using the path from the checked out repository
-
-      - name: Checkout Callable Workflow Repository
-        uses: dariocurr/checkout-called@v6
+      - name: Checkout callable repository 'Workaround 3 Dynamic'
+        uses: actions/checkout@v6
         with:
-          # Choose a folder that is hopefully not tracked by git and not used by other actions.
-          # Ideally path name contains the name of the callable workflow repository to avoid confusion with other reusable workflows in the same repository.
-          path: .github/._callable_workflow_repo
+          repository: ${{ env.repository }}
+          ref: ${{ inputs.ref }}
+          path: .github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}
 
-      - name: Dummy logging
-        shell: bash
-        run: |
-          echo ""
-          echo "================================================================="
-          echo ""
-
-      - name: Call Reusable Action from THIS Repo
-        uses: ./.github/._callable_workflow_repo/.github/actions/callable
+      # Cannot use this code as the "uses" must have a static value
+      # - name: Call Reusable Action from this Repo
+      #   uses: ./.github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}/.github/actions/callable
+      - name: Call Reusable Action from this Repo 'Workaround 4'
+        uses: jenseng/dynamic-uses@v1.1.1
+        with:
+          uses: etas-contrib/score_cicd-actions/.github/actions/callable@${{ inputs.ref }}
+          with: |
+            ref: ${{ inputs.ref }}
 
       - name: Call script from the workflow repository
         shell: bash
         run: |
-          echo ""
-          echo "================================================================="
-          echo ""
+          echo "::group::  Call script from the workflow repository"
 
-          # Go into the script folder
-          cd ./.github/._callable_workflow_repo/.github/scripts
-          chmod +x script.sh
-          ./script.sh
+          # Call the script using relative path
+          chmod +x ./.github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}/.github/scripts/script.sh
+          ./.github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}/.github/scripts/script.sh
 
-          echo ""
-          echo "================================================================="
-          echo ""
+          echo "::endgroup::"
 
-      # Idea was to move the checked out callable workflow repo to a folder outside the runner workspace (e.g. $HOME) and then delete it at the end of the workflow to clean up.
-      # However I cannot run this as this will lead to an error in the pipeline step "Post Call Reusable Action from THIS Repo" because it expects the files to
-      #   exist but they were deleted by this step and this step runs before the "Post" step.
-      # - name: Delete the callable workflow repository
-      #   if: ${{ always() }}
-      #   continue-on-error: true
-      #   run: rm -rf ${HOME}/work/_actions/_callable_workflow_repo
-      #   shell: bash
+      - name: Checkout callable repository 'Workaround 3 Static'
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.repository }}
+          ref: ${{ inputs.ref }}
+          path: .github/.reuse_gha_assets/${{ env.repository }}
+
+      - name: Call Reusable Action from this Repo 'Workaround 3 Static'
+        uses: ./.github/.reuse_gha_assets/etas-contrib/score_cicd-actions/.github/actions/callable_wa3static
