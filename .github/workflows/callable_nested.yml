@@ -20,27 +20,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      # - name: Check if repository already checked out
-      #   id: repo-check
-      #   shell: bash
-      #   run: |
-      #     repo_path=".github/.reuse/${{ env.repository }}/${{ inputs.ref }}"
-      #     if [ -d "$repo_path" ]; then
-      #       echo "exists=true" >> "$GITHUB_OUTPUT"
-      #     else
-      #       echo "exists=false" >> "$GITHUB_OUTPUT"
-      #     fi
-
-      - name: Checkout callable repository
+      - name: Checkout callable repository 'Workaround 3 Dynamic'
         uses: actions/checkout@v6
         with:
           repository: ${{ env.repository }}
           ref: ${{ inputs.ref }}
-          path: .github/.reuse/${{ env.repository }}/${{ inputs.ref }}
+          path: .github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}
 
       # Cannot use this code as the "uses" must have a static value
       # - name: Call Reusable Action from this Repo
-      #   uses: ./.github/.reuse/${{ env.repository }}/${{ inputs.ref }}/.github/actions/callable
+      #   uses: ./.github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}/.github/actions/callable
       - name: Call Reusable Action from this Repo 'Workaround 4'
         uses: jenseng/dynamic-uses@v1.1.1
         with:
@@ -54,8 +43,17 @@ jobs:
           echo "::group::  Call script from the workflow repository"
 
           # Call the script using relative path
-          chmod +x ./.github/.reuse/${{ env.repository }}/${{ inputs.ref }}/.github/scripts/script.sh
-          ./.github/.reuse/${{ env.repository }}/${{ inputs.ref }}/.github/scripts/script.sh
+          chmod +x ./.github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}/.github/scripts/script.sh
+          ./.github/.reuse_gha_assets/${{ env.repository }}/${{ inputs.ref }}/.github/scripts/script.sh
 
           echo "::endgroup::"
 
+      - name: Checkout callable repository 'Workaround 3 Static'
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.repository }}
+          ref: ${{ inputs.ref }}
+          path: .github/.reuse_gha_assets/${{ env.repository }}
+
+      - name: Call Reusable Action from this Repo 'Workaround 3 Static'
+        uses: ./.github/.reuse_gha_assets/etas-eng/vsps_infra_playground/.github/actions/callable_wa3static

@@ -22,6 +22,31 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
 
+      # Normally this checkout would be done but since the workflow is from the same repo like the reusable actions and workflows
+      # I can save another checkout and instead just create a symlink
+      # - name: Checkout callable repository 'Workaround 3 Static'
+      #   uses: actions/checkout@v6
+      #   with:
+      #     # In case this runs in a forked repository then the folder name would not match the actual repo name but it is always the name
+      #     # of the fork source (=PR target) repository
+      #     path: .github/.reuse_gha_assets/etas-eng/vsps_infra_playground
+
+      - name: Create symlink for the called actions
+        shell: bash
+        run: |
+          echo "::group::  Create symlink for the called actions"
+
+          # Create a symlink /.github/.reuse_gha_assets/etas-eng/vsps_infra_playground that points to the current folder where the repository is checked out.
+          # This is needed since the called action expects the repository to be checked out into a folder with the path
+          # .github/.reuse_gha_assets/vsps_infra_playground in the workspace of the calling workflow.
+          mkdir -p $PWD/.github/.reuse_gha_assets/etas-eng
+          ln -s $PWD/.github/.reuse_gha_assets/etas-eng/vsps_infra_playgroundcd $PWD
+
+          echo "::endgroup::"
+
+      - name: Call Reusable Action from this Repo 'Workaround 3 Static'
+        uses: ./.github/.reuse_gha_assets/etas-eng/vsps_infra_playground/.github/actions/callable_wa3static
+
   call-local-script:
     runs-on: ${{ vars.runner_labels_ghub_standard_x64 && fromJSON(vars.runner_labels_ghub_standard_x64) || 'ubuntu-latest' }}
     steps:

@@ -60,8 +60,6 @@ runs:
       uses: jenseng/dynamic-uses@v1.1.1
       with:
         uses: etas-eng/vsps_infra_playground/.github/actions/callable_nested@${{ inputs.ref }}
-        with: |
-          ref: ${{ inputs.ref }}
 
     - name: Symlink current actions repo 'Workaround 2'
       shell: bash
@@ -99,7 +97,6 @@ runs:
         # # Symlink the action repository to a unique folder name within the _actions folder
         # echo "Symlink $(pwd) to ${HOME}/work/_actions/$SYMLINK_FOLDER_NAME"
         # ln -s $ACTIONS_REPO_ROOT ${HOME}/work/_actions/$SYMLINK_FOLDER_NAME
-
         # But maybe this could be used https://github.com/marketplace/actions/dynamic-uses to dynamically call the nested action without needing a static path? This would be a better solution as it would allow multiple jobs to symlink the same repository without conflicts.
 
         echo "::endgroup::"

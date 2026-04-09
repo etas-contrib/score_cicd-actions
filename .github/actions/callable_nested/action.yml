@@ -21,7 +21,6 @@ runs:
         echo "github.workflow_ref: ${{ github.workflow_ref }}"
         echo "github.workflow_sha: ${{ github.workflow_sha }}"
         echo "github.workflow: ${{ github.workflow }}"
-        echo "inputs.ref: ${{ inputs.ref }}"
 
         echo "GH_ACTION_REPO: $GH_ACTION_REPO"
         echo "GH_ACTION_REF: $GH_ACTION_REF"

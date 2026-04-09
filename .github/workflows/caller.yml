@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "::group::  Check if repository already checked out 'Workaround 3 Dynamic'"
 
-          repo_path=".github/.reuse/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}"
+          repo_path=".github/.reuse_gha_assets/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}"
           if [ -d "$repo_path" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
@@ -53,17 +53,17 @@ jobs:
         with:
           repository: ${{ env.CENTRAL_GHA_ASSETS_REPO }}
           ref: ${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}
-          path: .github/.reuse/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}
+          path: .github/.reuse_gha_assets/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}
 
       # Next call does not work since the "uses" must be a static string
       # - name: Call remote action using relative path
-      #   uses: ./.github/.reuse/${{ inputs.central_gha_assets_repo }}/${{ inputs.central_gha_assets_repo_ref }}/.github/actions/callable
+      #   uses: ./.github/.reuse_gha_assets/${{ inputs.central_gha_assets_repo }}/${{ inputs.central_gha_assets_repo_ref }}/.github/actions/callable
 
       # This also does not work since the dynamic-uses action does not support local/relative paths of the action to call
       # - name: Call remote action using dynamic path 'Workaround 4'
       #   uses: jenseng/dynamic-uses@v1.1.1
       #   with:
-      #     uses: ./.github/.reuse/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}/.github/actions/callable
+      #     uses: ./.github/.reuse_gha_assets/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}/.github/actions/callable
       #     with: |
       #       ref: ${{ inputs.ref }}
 
@@ -72,15 +72,22 @@ jobs:
         run: |
           echo "::group::  Call script"
 
-          chmod +x ./.github/.reuse/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}/.github/scripts/script.sh
-          ./.github/.reuse/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}/.github/scripts/script.sh
+          chmod +x ./.github/.reuse_gha_assets/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}/.github/scripts/script.sh
+          ./.github/.reuse_gha_assets/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}/.github/scripts/script.sh
 
           echo "::endgroup::"
 
-      - name: Call remote action 'Workaround 4'
+      - name: Call remote action via remote path 'Workaround 4'
         uses: jenseng/dynamic-uses@v1.1.1
         with:
           uses: ${{ env.CENTRAL_GHA_ASSETS_REPO }}/.github/actions/callable@${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}
+          with: |
+            ref: ${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}
+
+      - name: Call remote action via local path 'Workaround 4'
+        uses: jenseng/dynamic-uses@v1.1.1
+        with:
+          uses: ./.github/.reuse_gha_assets/${{ env.CENTRAL_GHA_ASSETS_REPO }}/${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}/.github/actions/callable
           with: |
             ref: ${{ env.CENTRAL_GHA_ASSETS_REPO_REF }}
 
