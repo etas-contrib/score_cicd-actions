@@ -38,8 +38,8 @@ jobs:
 
           # Create a symlink /.github/.reuse_gha_assets/etas-contrib/score_cicd-actions that points to the current folder where the repository is checked out.
           # This is needed since the called action expects the repository to be checked out into a folder with the path
-          # .github/.reuse_gha_assets/vsps_infra_playground in the workspace of the calling workflow.
-          mkdir -p $PWD/.github/.reuse_gha_assets/etas-eng
+          # .github/.reuse_gha_assets/etas-contrib/score_cicd-actions in the workspace of the calling workflow.
+          mkdir -p $PWD/.github/.reuse_gha_assets/etas-contrib
           ln -s $PWD/.github/.reuse_gha_assets/etas-contrib/score_cicd-actionscd $PWD
 
           echo "::endgroup::"
