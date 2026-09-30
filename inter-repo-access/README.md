@@ -10,15 +10,19 @@ It works on both GitHub.com and GitHub Enterprise Server (GHES). The action deri
 
 Either a GitHub App or a direct token must be provided. If neither is given, the action falls back to `github.token`, which only has access to the current repository.
 
-**GitHub App (recommended):** generates a short-lived installation token scoped to the organization.
+**GitHub App (recommended):** generates a short-lived installation token for the current repository owner's installation, optionally restricted to named repositories.
 
 ```yaml
 with:
   github-app-client-id: ${{ vars.INTER_REPO_APP_CLIENT_ID }}
   github-app-private-key: ${{ secrets.INTER_REPO_APP_PRIVATE_KEY }}
+  github-app-repositories: |
+    cicd-workflows
+    score
+    cicd-actions
 ```
 
-The installation owner is derived from `github.repository_owner` — the organization that triggered the workflow run. When called through a reusable workflow, this is always the caller's organization.
+The installation owner is always `github.repository_owner` — when called through a reusable workflow, this is the caller's owner. `github-app-repositories` optionally restricts the token to explicitly named repositories in that installation. Use comma-separated or newline-separated names; wildcards are not supported. If omitted, the token covers all repositories available to that App installation.
 
 **Direct token:** use a personal access token or a fine-grained token with the required repository access.
 
@@ -53,6 +57,7 @@ This action configures git URL rewrites and optionally calls `actions/create-git
 
 - `github-app-client-id`: GitHub App client ID. When set, `github-app-private-key` is also required.
 - `github-app-private-key`: GitHub App private key.
+- `github-app-repositories`: Optional comma- or newline-separated repository names in the current owner's installation. Wildcards are not supported; empty means all repositories available to the installation.
 - `token`: Direct token used when GitHub App credentials are not provided.
 
 ## Outputs
@@ -80,6 +85,10 @@ jobs:
         with:
           github-app-client-id: ${{ vars.INTER_REPO_APP_CLIENT_ID }}
           github-app-private-key: ${{ secrets.INTER_REPO_APP_PRIVATE_KEY }}
+          github-app-repositories: |
+            cicd-workflows
+            score
+            cicd-actions
           token: ${{ secrets.INTER_REPO_TOKEN }}
 
       - name: Checkout another repository

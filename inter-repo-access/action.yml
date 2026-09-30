@@ -23,6 +23,10 @@ inputs:
     description: GitHub App private key for actions/create-github-app-token.
     required: false
     default: ""
+  github-app-repositories:
+    description: Optional comma or newline-separated repository names to include in the current owner's GitHub App token. Empty means all repositories available to the installation.
+    required: false
+    default: ""
   token:
     description: Token used when GitHub App credentials are not provided. Pass a secret-backed value when needed.
     required: false
@@ -53,6 +57,7 @@ runs:
       env:
         APP_CLIENT_ID: ${{ inputs.github-app-client-id }}
         APP_PRIVATE_KEY: ${{ inputs.github-app-private-key }}
+        APP_REPOSITORIES: ${{ inputs.github-app-repositories }}
       run: |
         set -euo pipefail
 
@@ -67,6 +72,11 @@ runs:
           exit 1
         fi
 
+        if [[ -z "$APP_CLIENT_ID" && -n "$APP_REPOSITORIES" ]]; then
+          echo "github-app-repositories requires GitHub App credentials."
+          exit 1
+        fi
+
     - name: Create GitHub App token
       if: ${{ inputs.github-app-client-id != '' && inputs.github-app-private-key != '' }}
       id: app-token
@@ -75,6 +85,7 @@ runs:
         client-id: ${{ inputs.github-app-client-id }}
         private-key: ${{ inputs.github-app-private-key }}
         owner: ${{ github.repository_owner }}
+        repositories: ${{ inputs.github-app-repositories }}
 
     - name: Select auth mode
       id: select-token
