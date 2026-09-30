@@ -77,6 +77,26 @@ jobs:
           git clone --depth 1 "https://github.com/${TARGET_REPOSITORY}.git" clone-https >/dev/null
           git clone --depth 1 "git@github.com:${TARGET_REPOSITORY}.git" clone-ssh >/dev/null
 
+      - name: Reject repository scoping without App credentials
+        id: missing-app-credentials
+        uses: ./inter-repo-access
+        continue-on-error: true
+        with:
+          github-app-repositories: repository-without-app-credentials
+
+      - name: Verify repository scoping requires App credentials
+        if: ${{ always() }}
+        shell: bash
+        env:
+          INVALID_SCOPE_OUTCOME: ${{ steps.missing-app-credentials.outcome }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$INVALID_SCOPE_OUTCOME" != "failure" ]]; then
+            echo "Expected repository scoping without App credentials to fail, got '$INVALID_SCOPE_OUTCOME'."
+            exit 1
+          fi
+
   token-mode:
     name: Self-test token mode
     # Secrets are only available for this manual path; workflow_call covers github.token mode.
